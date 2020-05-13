@@ -100,7 +100,7 @@ void create() {
 	Account acc = Account();
 	acc.accID = id;
 	acc.balance = money;
-	strcpy_s(acc.cusName, name); //이름을 넘겨주기 위해서 strcpy 사용
+	strcpy_s(acc.cusName,NAME_LEN, name); //이름을 넘겨주기 위해서 strcpy 사용
 	accounts[members] = acc;
 	members++;
 }
@@ -123,7 +123,7 @@ void main() {
 			showAllAccount();
 			break;
 		case 5:
-			delete accounts;
+			delete[] accounts;
 			cout << "할당 해제 및 프로그램 종료" << endl;
 			return;
 		}
