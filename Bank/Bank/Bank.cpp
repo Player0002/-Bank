@@ -2,18 +2,69 @@
 #define NAME_LEN 20
 #define MAX_ACCOUNT 100
 using namespace std;
-typedef struct {
+class Account {
+private:
 	int accID;
 	int balance;
-	char cusName[NAME_LEN];
-} Account;
-Account *accounts = new Account[MAX_ACCOUNT];
+	char* cusName;
+	long long ssn;
+public:
+	Account() {
+		accID = -1;
+		balance = -1;
+		cusName = nullptr;
+		ssn = -1;
+	}
+	Account(int accId, int balance, char* cusName, long long ssn) {
+		this->accID = accId;
+		this->balance = balance;
+		this->cusName = new char[NAME_LEN];
+		strcpy_s(this->cusName, NAME_LEN, cusName);
+		this->ssn = ssn;
+	}
+	void disposit(int amount) {
+		this->balance += amount;
+	}
+	bool drawal(int amount) {
+		if (balance >= amount) {
+			this->balance -= amount;
+			return true;
+		}
+		return false;
+	}
+	void printInfo() {
+		cout << endl;
+		cout << " Account ID :  " << accID << endl;
+		cout << " Username : " << cusName << endl;
+		cout << " Money : " << balance << endl;
+		cout << " SSN : " << ssn << endl;
+		cout << endl;
+	}
+	bool ssnCheck(long long ssn) {
+		return this->ssn == ssn;
+	}
+	bool equal(int accID) {
+		return this->accID == accID;
+	}
+	~Account() {
+		if (cusName != nullptr) delete cusName;
+	}
+};
+
+
+Account* accounts[MAX_ACCOUNT];
 int members = 0;
 int findIdx(int accId) { // return accId account num
 	for (int i = 0; i < members; i++) {
-		if (accounts[i].accID == accId) return i;
+		if (accounts[i]->equal(accId)) return i;
 	}
 	return -1;
+}
+bool ssnCheck(long long ssn) {
+	for (int i = 0; i < members; i++) {
+		if (accounts[i]->ssnCheck(ssn)) return false;
+	}
+	return true;
 }
 void showMenu() {
 	cout << "1. 계좌개설" << endl;
@@ -31,11 +82,7 @@ void showAllAccount() {
 		return;
 	}
 	for (int i = 0; i < members; i++) {
-		cout << endl;
-		cout << "계좌ID : " << accounts[i].accID << endl;
-		cout << "이   름: " << accounts[i].cusName << endl;
-		cout << "잔   액: " << accounts[i].balance << endl;
-		cout << endl;
+		accounts[i]->printInfo();
 	}
 }
 void drawal() {
@@ -51,11 +98,13 @@ void drawal() {
 	cout << "출금액: ";
 	cin >> money;
 	
-	if (accounts[account_id].balance < money) {
-		cout << "잔액이 부족합니다. 현재 잔액 : " << accounts[account_id].balance << endl;
-		return;
+	bool isWork = accounts[account_id]->drawal(money);
+	if (isWork) {
+		cout << "출금이 완료되었습니다" << endl;
 	}
-	accounts[account_id].balance -= money;
+	else {
+		cout << "잔액이 부족합니다. " << endl;
+	}
 }
 void disposit() {
 	int id, money;
@@ -72,7 +121,7 @@ void disposit() {
 
 
 	
-	accounts[account_id].balance += money;
+	accounts[account_id]->disposit(money);
 }
 void create() {
 	if (members >= 100) {
@@ -80,10 +129,12 @@ void create() {
 		return;
 	}
 	int id, money;
+	long long ssn;
 	char name[NAME_LEN];
 	cout << "계좌ID: "; cin >> id;
 	cout << "이  름: "; cin >> name;
 	cout << "입금액: "; cin >> money;
+	cout << "주민등록번호 (- 제외) : "; cin >> ssn;
 	int isCanUse = findIdx(id);
 	if (id < 0) {
 		cout << "사용할 수 없는 계좌번호 입니다." << endl;
@@ -97,11 +148,11 @@ void create() {
 		cout << "이미 같은 계좌번호가 존재합니다." << endl;
 		return;
 	}
-	Account acc = Account();
-	acc.accID = id;
-	acc.balance = money;
-	strcpy_s(acc.cusName,NAME_LEN, name); //이름을 넘겨주기 위해서 strcpy 사용
-	accounts[members] = acc;
+	if (!ssnCheck(ssn)) {
+		cout << "이미 가입되신 고객님이십니다." << endl;
+		return;
+	}
+	accounts[members] = new Account(id, money, name, ssn);
 	members++;
 }
 void main() {
@@ -123,7 +174,7 @@ void main() {
 			showAllAccount();
 			break;
 		case 5:
-			delete[] accounts;
+			for (int i = 0; i < members; i++) delete accounts[i];
 			cout << "할당 해제 및 프로그램 종료" << endl;
 			return;
 		}
