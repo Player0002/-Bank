@@ -47,7 +47,7 @@ public:
 		return this->accID == accID;
 	}
 	~Account() {
-		if (cusName != nullptr) delete cusName;
+		if (cusName != nullptr) delete[] cusName;
 	}
 };
 
