@@ -1,37 +1,44 @@
 #include <iostream>
+#include <string.h>
 #define NAME_LEN 20
 #define MAX_ACCOUNT 100
 using namespace std;
+
 class Account {
 private:
-	int accID;
+	const int accID;
+	const long long ssn;
 	int balance;
 	char* cusName;
-	long long ssn;
 public:
-	Account() {
-		accID = -1;
+	Account() : accID(-1), ssn(-1){
 		balance = -1;
 		cusName = nullptr;
-		ssn = -1;
 	}
-	Account(int accId, int balance, char* cusName, long long ssn) {
-		this->accID = accId;
+	
+	Account(int accId, int balance, char* cusName, long long _ssn) : accID(accId), ssn(_ssn) {
 		this->balance = balance;
 		this->cusName = new char[NAME_LEN];
-		strcpy_s(this->cusName, NAME_LEN, cusName);
-		this->ssn = ssn;
+		strcpy(this->cusName, cusName);
 	}
-	void disposit(int amount) {
+
+	Account(const Account& ref) : accID(ref.accID), ssn(ref.ssn), balance(ref.balance){
+	  this->cusName = new char[NAME_LEN];
+	  strcpy(this->cusName, ref.cusName);
+	}
+	
+	void disposit(const int amount) {
 		this->balance += amount;
 	}
-	bool drawal(int amount) {
+	
+	bool drawal(const int amount) {
 		if (balance >= amount) {
 			this->balance -= amount;
 			return true;
 		}
 		return false;
 	}
+	
 	void printInfo() {
 		cout << endl;
 		cout << " Account ID :  " << accID << endl;
@@ -40,32 +47,39 @@ public:
 		cout << " SSN : " << ssn << endl;
 		cout << endl;
 	}
-	bool ssnCheck(long long ssn) {
+	
+	bool ssnCheck(const long long ssn){
 		return this->ssn == ssn;
 	}
-	bool equal(int accID) {
+	
+	bool equal(const int accID){
 		return this->accID == accID;
 	}
+	
 	~Account() {
 		if (cusName != nullptr) delete[] cusName;
 	}
+	
 };
 
 
 Account* accounts[MAX_ACCOUNT];
 int members = 0;
-int findIdx(int accId) { // return accId account num
+
+int findIdx(const int accId) { // return accId account num
 	for (int i = 0; i < members; i++) {
 		if (accounts[i]->equal(accId)) return i;
 	}
 	return -1;
 }
-bool ssnCheck(long long ssn) {
+
+bool ssnCheck(const long long ssn) {
 	for (int i = 0; i < members; i++) {
 		if (accounts[i]->ssnCheck(ssn)) return false;
 	}
 	return true;
 }
+
 void showMenu() {
 	cout << "1. 계좌개설" << endl;
 	cout << "2. 입    금" << endl;
@@ -74,6 +88,7 @@ void showMenu() {
 	cout << "5. 프로그램 종료" << endl;
 	cout << "선택 : ";
 }
+
 void showAllAccount() {
 	if (members == 0) {
 		cout << endl;
@@ -85,12 +100,13 @@ void showAllAccount() {
 		accounts[i]->printInfo();
 	}
 }
+
 void drawal() {
 	int id, money;
 	cout << "[출    금]" << endl;
 	cout << "계좌ID: ";
 	cin >> id;
-	int account_id = findIdx(id);
+	const int account_id = findIdx(id);
 	if (account_id == -1) {
 		cout << "유효하지 않은 ID 입니다." << endl;
 		return;
@@ -106,12 +122,13 @@ void drawal() {
 		cout << "잔액이 부족합니다. " << endl;
 	}
 }
+
 void disposit() {
 	int id, money;
 	cout << "[입    금]" << endl;
 	cout << "계좌ID: ";
 	cin >> id;
-	int account_id = findIdx(id);
+	const int account_id = findIdx(id);
 	if (account_id == -1) {
 		cout << "유효하지 않은 ID 입니다." << endl;
 		return;
@@ -123,6 +140,7 @@ void disposit() {
 	
 	accounts[account_id]->disposit(money);
 }
+
 void create() {
 	if (members >= 100) {
 		cout << "OOPS 저희 은행은 더이상 계좌를 생성할 수 없습니다." << endl;
@@ -135,7 +153,7 @@ void create() {
 	cout << "이  름: "; cin >> name;
 	cout << "입금액: "; cin >> money;
 	cout << "주민등록번호 (- 제외) : "; cin >> ssn;
-	int isCanUse = findIdx(id);
+	const int isCanUse = findIdx(id);
 	if (id < 0) {
 		cout << "사용할 수 없는 계좌번호 입니다." << endl;
 		return;
@@ -155,7 +173,8 @@ void create() {
 	accounts[members] = new Account(id, money, name, ssn);
 	members++;
 }
-void main() {
+
+int main() {
 	int choice = 0;
 	while (true) {
 		showMenu();
@@ -176,8 +195,9 @@ void main() {
 		case 5:
 			for (int i = 0; i < members; i++) delete accounts[i];
 			cout << "할당 해제 및 프로그램 종료" << endl;
-			return;
+			return 0;
 		}
 	}
+	return 0;
 
 }
