@@ -119,7 +119,7 @@ public:
 		accounts[members] = new Account(id, money, name, ssn);
 		members++;
 	}
-	void endProcess() {
+	~AccountManager() {
 		for (int i = 0; i < members; i++) delete accounts[i];
 		cout << "할당 해제 및 프로그램 종료" << endl;
 	}
@@ -205,7 +205,6 @@ int main() {
 			manager->showAllAccount();
 			break;
 		case 5:
-			manager->endProcess();
 			delete manager;
 			return 0;
 		}
